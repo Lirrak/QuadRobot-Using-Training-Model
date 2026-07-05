@@ -55,15 +55,16 @@ class SesameGymEnv(gym.Env):
         # Action space: 8 joint target deltas in [-1.0, 1.0] scaled to max 0.1 rad (~5.7 deg)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(8,), dtype=np.float32)
         
-        # Observation space (27 dimensions):
+        # Observation space (29 dimensions):
         # - Joint positions (8)
         # - Joint velocities (8)
         # - Base orientation: roll, pitch (2)
         # - Base linear velocity: vx, vy, vz (3)
         # - Base angular velocity: wx, wy, wz (3)
         # - Command velocity: vx_cmd, vy_cmd, yaw_cmd (3)
+        # - Gait clock phase: sin(phase), cos(phase) (2)
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(27,), dtype=np.float32
+            low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32
         )
         
         # State variables
@@ -229,14 +230,21 @@ class SesameGymEnv(gym.Env):
             lin_vel = lin_vel + np.random.normal(0, self.sensor_noise_std['imu_vel'], size=3)
             ang_vel = ang_vel + np.random.normal(0, self.sensor_noise_std['imu_vel'], size=3)
             
-        # Concatenate into 26-dim observation
+        # Gait clock phase (sin and cos) at target frequency (e.g. 1.5 Hz)
+        gait_freq = 1.5
+        phase = 2 * np.pi * gait_freq * (self._step_counter / self.control_freq)
+        sin_phase = np.sin(phase)
+        cos_phase = np.cos(phase)
+        
+        # Concatenate into 29-dim observation
         obs = np.concatenate([
-            q,                 # 8
-            dq,                # 8
-            [roll, pitch],     # 2
-            lin_vel,           # 3
-            ang_vel,           # 3
-            self.cmd_velocity  # 3
+            q,                      # 8
+            dq,                     # 8
+            [roll, pitch],          # 2
+            lin_vel,                # 3
+            ang_vel,                # 3
+            self.cmd_velocity,      # 3
+            [sin_phase, cos_phase]  # 2 -> Total 29
         ]).astype(np.float32)
         
         return obs
