@@ -14,6 +14,12 @@ from sesame_gym_env import SesameGymEnv
 def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_train=False, checkpoint_path=None, ent_coef=0.01):
     os.makedirs(log_dir, exist_ok=True)
     
+    # Set up entropy coefficient decay schedule
+    if isinstance(ent_coef, float) and ent_coef > 0:
+        ent_coef_val = ent_coef
+        ent_coef = lambda progress_remaining: ent_coef_val * progress_remaining
+        print(f"Using linear entropy decay starting from {ent_coef_val}")
+    
     norm_path = os.path.join(log_dir, "sesame_vec_normalize.pkl")
     model_path = os.path.join(log_dir, "sesame_ppo_model.zip")
     
@@ -29,7 +35,7 @@ def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_
         else:
             env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.0)
             print("  No normalizer found, starting fresh normalizer.")
-        model = PPO.load(checkpoint_path, env=env, ent_coef=ent_coef)
+        model = PPO.load(checkpoint_path, env=env, ent_coef=ent_coef, device="cpu")
         print(f"  Checkpoint loaded (ent_coef={ent_coef}). Resuming training for {total_timesteps} more steps.")
     # Option 2: Continue from latest saved model
     elif continue_train and os.path.exists(model_path) and os.path.exists(norm_path):
@@ -37,7 +43,7 @@ def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_
         env = VecNormalize.load(norm_path, make_vec_env(SesameGymEnv, n_envs=n_envs))
         env.training = True
         env.norm_reward = True
-        model = PPO.load(model_path, env=env, ent_coef=ent_coef)
+        model = PPO.load(model_path, env=env, ent_coef=ent_coef, device="cpu")
     else:
         if continue_train:
             print("Warning: Existing model/normalizer files not found. Starting training from scratch.")
@@ -66,7 +72,8 @@ def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_
             gamma=0.99,
             gae_lambda=0.95,
             clip_range=0.2,
-            ent_coef=0.01,
+            ent_coef=ent_coef,
+            device="cpu",
             verbose=1,
             tensorboard_log=os.path.join(log_dir, "tb_logs")
         )
@@ -117,7 +124,7 @@ def evaluate_policy(model_path="./logs/sesame_ppo_model", norm_path="./logs/sesa
         vec_env = make_vec_env(lambda: eval_env, n_envs=1)
 
     # Load trained model
-    model = PPO.load(model_path, env=vec_env)
+    model = PPO.load(model_path, env=vec_env, device="cpu")
     
     # Set up video writer if recording
     video_writer = None

@@ -143,7 +143,7 @@ class SesameGymEnv(gym.Env):
         terminated = False
         truncated = False
         
-        if base_pos[2] < 0.030 or abs(roll) > 0.7 or abs(pitch) > 0.7:
+        if base_pos[2] < 0.025 or abs(roll) > 0.7 or abs(pitch) > 0.7:
             terminated = True
             print(f"DEBUG TERMINATION: Height={base_pos[2]:.4f}, Roll={roll:.4f}, Pitch={pitch:.4f}")
             
@@ -182,8 +182,8 @@ class SesameGymEnv(gym.Env):
         self.target_history = [self.stand_angles.copy()]
         self.joint_targets = self.stand_angles.copy()
         
-        # Set initial base position slightly off the ground (e.g. z = 0.043 m)
-        self.data.qpos[0:3] = [0.0, 0.0, 0.043]
+        # Set initial base position slightly off the ground (e.g. z = 0.050 m)
+        self.data.qpos[0:3] = [0.0, 0.0, 0.050]
         self.data.qpos[3:7] = [1.0, 0.0, 0.0, 0.0]  # [w, x, y, z]
         # Initialize joint position to standing angles
         self.data.qpos[7:15] = self.stand_angles
@@ -266,7 +266,7 @@ class SesameGymEnv(gym.Env):
         torque_penalty = -0.05 * np.sum(np.abs(actuator_forces))
         
         # Joint speed penalty (penalize jitter)
-        jerk_penalty = -0.01 * np.sum(np.abs(self.data.qvel[6:14]))
+        jerk_penalty = -0.03 * np.sum(np.abs(self.data.qvel[6:14]))
         
         # Yaw command orientation keeping (if cmd yaw is 0, punish angular vz deviation)
         yaw_drift_penalty = 0.0
@@ -274,7 +274,7 @@ class SesameGymEnv(gym.Env):
             yaw_drift_penalty = -5.0 * (wz_local ** 2)
             
         # Action rate penalty (penalize joint target changes)
-        action_rate_penalty = -0.02 * np.sum(np.square(action - self.prev_action))
+        action_rate_penalty = -0.05 * np.sum(np.square(action - self.prev_action))
             
         # Combine rewards
         reward = (
