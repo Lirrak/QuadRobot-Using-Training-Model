@@ -252,7 +252,8 @@ class SesameGymEnv(gym.Env):
         r_vy = np.exp(-((vy_local - self.cmd_velocity[1]) ** 2) / 0.04)
         r_wz = np.exp(-((wz_local - self.cmd_velocity[2]) ** 2) / 0.04)
         
-        tracking_reward = r_vx * r_vy * r_wz
+        # Additive reward structure is much easier for RL to optimize than multiplicative
+        tracking_reward = 0.5 * r_vx + 0.3 * r_vy + 0.2 * r_wz
         
         # 2. Penalties
         # Roll and Pitch tilt penalty (keep robot flat)
@@ -321,7 +322,16 @@ class SesameGymEnv(gym.Env):
         elif self.render_mode == "rgb_array":
             if self.renderer is None:
                 self.renderer = mujoco.Renderer(self.model, height=480, width=640)
-            self.renderer.update_scene(self.data)
+            
+            # Setup tracking camera to follow base_link (body id 1)
+            camera = mujoco.MjvCamera()
+            camera.trackbodyid = 1  # base_link
+            camera.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+            camera.distance = 0.4
+            camera.elevation = -25
+            camera.azimuth = 135
+            
+            self.renderer.update_scene(self.data, camera=camera)
             return self.renderer.render()
 
     def close(self):
