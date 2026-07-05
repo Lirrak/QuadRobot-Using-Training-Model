@@ -20,3 +20,11 @@ Thumbs.db
 # PlatformIO
 .pio/
 .vscode/
+
+# Python/ML logs and cache
+logs/checkpoints/
+logs/tb_logs/
+logs/evaluation.mp4
+__pycache__/
+*.pyc
+MJDATA.TXT
