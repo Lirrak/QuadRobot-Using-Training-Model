@@ -280,10 +280,8 @@ class SesameGymEnv(gym.Env):
         # Joint speed penalty (penalize jitter)
         jerk_penalty = -0.01 * np.sum(np.abs(self.data.qvel[6:14]))
         
-        # Yaw command orientation keeping (if cmd yaw is 0, punish angular vz deviation)
-        yaw_drift_penalty = 0.0
-        if abs(self.cmd_velocity[2]) < 0.01:
-            yaw_drift_penalty = -5.0 * (wz_local ** 2)
+        # Yaw tracking penalty (always active, penalizes deviation from commanded yaw rate)
+        yaw_drift_penalty = -5.0 * ((wz_local - self.cmd_velocity[2]) ** 2)
             
         # Action rate penalty (penalize joint target changes)
         action_rate_penalty = -0.02 * np.sum(np.square(action - self.prev_action))
