@@ -269,8 +269,9 @@ class SesameGymEnv(gym.Env):
         tilt_penalty = -5.0 * (roll ** 2 + pitch ** 2)
         
         # Height penalty (keep base around 0.042m stand height)
+        # Use absolute error with a gain of 100.0 to prevent vanishing gradients
         height_err = pos[2] - 0.042
-        height_penalty = -10.0 * (height_err ** 2)
+        height_penalty = -100.0 * abs(height_err)
         
         # Smoothness / Torque penalty using actuators force
         # In MuJoCo, data.actuator_force contains the output of the actuators
