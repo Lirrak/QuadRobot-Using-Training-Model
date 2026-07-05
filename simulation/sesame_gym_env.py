@@ -248,12 +248,13 @@ class SesameGymEnv(gym.Env):
         vy_local = lin_vel[1]
         wz_local = ang_vel[2]
         
-        r_vx = np.exp(-((vx_local - self.cmd_velocity[0]) ** 2) / 0.04)
-        r_vy = np.exp(-((vy_local - self.cmd_velocity[1]) ** 2) / 0.04)
-        r_wz = np.exp(-((wz_local - self.cmd_velocity[2]) ** 2) / 0.04)
+        r_vx = np.exp(-((vx_local - self.cmd_velocity[0]) ** 2) / 0.01)
+        r_vy = np.exp(-((vy_local - self.cmd_velocity[1]) ** 2) / 0.01)
+        r_wz = np.exp(-((wz_local - self.cmd_velocity[2]) ** 2) / 0.01)
         
         # Additive reward structure is much easier for RL to optimize than multiplicative
-        tracking_reward = 0.5 * r_vx + 0.3 * r_vy + 0.2 * r_wz
+        # Prioritize forward velocity (0.7) and penalize lateral and angular velocities
+        tracking_reward = 0.7 * r_vx + 0.15 * r_vy + 0.15 * r_wz
         
         # 2. Penalties
         # Roll and Pitch tilt penalty (keep robot flat)
@@ -291,7 +292,7 @@ class SesameGymEnv(gym.Env):
         )
         
         # Small living reward to prevent sitting down
-        reward += 0.5
+        reward += 0.1
         
         return reward
 
