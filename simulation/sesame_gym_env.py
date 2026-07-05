@@ -144,7 +144,7 @@ class SesameGymEnv(gym.Env):
         terminated = False
         truncated = False
         
-        if base_pos[2] < 0.025 or abs(roll) > 0.7 or abs(pitch) > 0.7:
+        if base_pos[2] < 0.020 or abs(roll) > 0.7 or abs(pitch) > 0.7:
             terminated = True
             print(f"DEBUG TERMINATION: Height={base_pos[2]:.4f}, Roll={roll:.4f}, Pitch={pitch:.4f}")
             # Penalize early termination to break the collapse exploit
@@ -256,9 +256,9 @@ class SesameGymEnv(gym.Env):
         vy_local = lin_vel[1]
         wz_local = ang_vel[2]
         
-        r_vx = np.exp(-((vx_local - self.cmd_velocity[0]) ** 2) / 0.01)
-        r_vy = np.exp(-((vy_local - self.cmd_velocity[1]) ** 2) / 0.01)
-        r_wz = np.exp(-((wz_local - self.cmd_velocity[2]) ** 2) / 0.01)
+        r_vx = np.exp(-((vx_local - self.cmd_velocity[0]) ** 2) / 0.02)
+        r_vy = np.exp(-((vy_local - self.cmd_velocity[1]) ** 2) / 0.02)
+        r_wz = np.exp(-((wz_local - self.cmd_velocity[2]) ** 2) / 0.02)
         
         # Additive reward structure is much easier for RL to optimize than multiplicative
         # Prioritize forward velocity (0.7) and penalize lateral and angular velocities
@@ -298,7 +298,7 @@ class SesameGymEnv(gym.Env):
         )
         
         # Small living reward to prevent sitting down
-        reward += 0.1
+        reward += 0.5
         
         return reward
 

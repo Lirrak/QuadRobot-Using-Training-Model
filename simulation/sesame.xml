@@ -111,13 +111,13 @@
 
   <!-- Actuators definition mapping to joints with SG90 torque limits (1.6 kg-cm = 0.16 N-m) -->
   <actuator>
-    <position name="front_right_hip_act" joint="front_right_hip" kp="3.5" ctrlrange="-0.7854 1.5708" forcerange="-0.16 0.16"/>
-    <position name="front_right_knee_act" joint="front_right_knee" kp="3.5" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
-    <position name="back_right_hip_act" joint="back_right_hip" kp="3.5" ctrlrange="-1.5708 0.7854" forcerange="-0.16 0.16"/>
-    <position name="back_right_knee_act" joint="back_right_knee" kp="3.5" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
-    <position name="front_left_hip_act" joint="front_left_hip" kp="3.5" ctrlrange="-0.7854 1.5708" forcerange="-0.16 0.16"/>
-    <position name="front_left_knee_act" joint="front_left_knee" kp="3.5" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
-    <position name="back_left_hip_act" joint="back_left_hip" kp="3.5" ctrlrange="-1.5708 0.7854" forcerange="-0.16 0.16"/>
-    <position name="back_left_knee_act" joint="back_left_knee" kp="3.5" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
+    <position name="front_right_hip_act" joint="front_right_hip" kp="12.0" ctrlrange="-0.7854 1.5708" forcerange="-0.16 0.16"/>
+    <position name="front_right_knee_act" joint="front_right_knee" kp="12.0" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
+    <position name="back_right_hip_act" joint="back_right_hip" kp="12.0" ctrlrange="-1.5708 0.7854" forcerange="-0.16 0.16"/>
+    <position name="back_right_knee_act" joint="back_right_knee" kp="12.0" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
+    <position name="front_left_hip_act" joint="front_left_hip" kp="12.0" ctrlrange="-0.7854 1.5708" forcerange="-0.16 0.16"/>
+    <position name="front_left_knee_act" joint="front_left_knee" kp="12.0" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
+    <position name="back_left_hip_act" joint="back_left_hip" kp="12.0" ctrlrange="-1.5708 0.7854" forcerange="-0.16 0.16"/>
+    <position name="back_left_knee_act" joint="back_left_knee" kp="12.0" ctrlrange="-1.5708 0.0" forcerange="-0.16 0.16"/>
   </actuator>
 </mujoco>
