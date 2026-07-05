@@ -6,19 +6,26 @@ import gymnasium as gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecNormalize
-from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback, BaseCallback, CallbackList
 
 # Import our custom environment
 from sesame_gym_env import SesameGymEnv
 
+class EntropyDecayCallback(BaseCallback):
+    def __init__(self, initial_ent_coef: float, verbose: int = 0):
+        super().__init__(verbose)
+        self.initial_ent_coef = initial_ent_coef
+
+    def _on_step(self) -> bool:
+        # self.model._current_progress_remaining goes from 1.0 down to 0.0
+        self.model.ent_coef = self.initial_ent_coef * self.model._current_progress_remaining
+        return True
+
 def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_train=False, checkpoint_path=None, ent_coef=0.01):
     os.makedirs(log_dir, exist_ok=True)
     
-    # Set up entropy coefficient decay schedule
-    if isinstance(ent_coef, float) and ent_coef > 0:
-        ent_coef_val = ent_coef
-        ent_coef = lambda progress_remaining: ent_coef_val * progress_remaining
-        print(f"Using linear entropy decay starting from {ent_coef_val}")
+    initial_ent_coef = ent_coef
+    print(f"Using initial entropy coefficient: {initial_ent_coef}")
     
     norm_path = os.path.join(log_dir, "sesame_vec_normalize.pkl")
     model_path = os.path.join(log_dir, "sesame_ppo_model.zip")
@@ -85,10 +92,18 @@ def train_policy(total_timesteps=1000000, n_envs=8, log_dir="./logs/", continue_
         name_prefix="sesame_ppo"
     )
     
+    # Set up callbacks list
+    callbacks = [checkpoint_callback]
+    if initial_ent_coef > 0:
+        callbacks.append(EntropyDecayCallback(initial_ent_coef))
+        print(f"Added EntropyDecayCallback with initial ent_coef={initial_ent_coef}")
+    
+    callback_list = CallbackList(callbacks)
+    
     start_time = time.time()
     model.learn(
         total_timesteps=total_timesteps,
-        callback=checkpoint_callback,
+        callback=callback_list,
         progress_bar=True
     )
     duration = time.time() - start_time
